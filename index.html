@@ -1,0 +1,300 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AAVISHKAR 2026–27 | Feedback & Certificate</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Playfair+Display:wght@700;800;900&display=swap" rel="stylesheet">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body class="bg-slate-100 min-h-screen flex flex-col">
+
+    <!-- Header -->
+    <header class="bg-teal-800 text-white py-4 px-4 text-center shadow-md">
+        <h1 class="text-2xl font-bold" style="font-family: 'Playfair Display', serif;">AAVISHKAR 2026–27</h1>
+        <p class="text-sm text-teal-200">SIDDHIVINAYAK TECHNICAL CAMPUS, SHEGAON</p>
+    </header>
+
+    <!-- Main -->
+    <main class="flex-1 max-w-2xl mx-auto w-full p-4">
+
+        <!-- Form -->
+        <div id="form-container" class="bg-white rounded-xl shadow-md p-6 mt-6">
+            <h2 class="text-xl font-bold text-teal-800 mb-1">Participant Feedback</h2>
+            <p class="text-sm text-slate-500 mb-5">Fill this quick form to get your participation certificate.</p>
+
+            <form id="feedbackForm" class="space-y-5">
+                <div class="space-y-3">
+                    <div>
+                        <label class="block text-sm font-medium text-slate-700 mb-1">Full Name *</label>
+                        <input type="text" id="fullName" required class="w-full border border-slate-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-teal-500" placeholder="Enter your full name">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-slate-700 mb-1">Email *</label>
+                        <input type="email" id="email" required class="w-full border border-slate-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-teal-500" placeholder="you@example.com">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-slate-700 mb-1">Department / Branch *</label>
+                        <input type="text" id="department" required class="w-full border border-slate-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-teal-500" placeholder="e.g. Computer Engineering">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-slate-700 mb-1">Academic Level *</label>
+                        <select id="academicLevel" required class="w-full border border-slate-300 rounded-lg px-3 py-2 text-sm bg-white focus:outline-none focus:ring-2 focus:ring-teal-500">
+                            <option value="">Select</option>
+                            <option value="Undergraduate" selected>Undergraduate</option>
+                            <option value="Postgraduate">Postgraduate</option>
+                            <option value="Post-PG / Ph.D.">Post-PG / Ph.D.</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-slate-700 mb-1">Participation Category *</label>
+                        <select id="participationCategory" required class="w-full border border-slate-300 rounded-lg px-3 py-2 text-sm bg-white focus:outline-none focus:ring-2 focus:ring-teal-500">
+                            <option value="">Select</option>
+                            <option value="Humanities, Languages and Fine Arts (HLF)">Humanities, Languages and Fine Arts (HLF)</option>
+                            <option value="Commerce, Management and Law (CML)">Commerce, Management and Law (CML)</option>
+                            <option value="Pure Sciences (PS)">Pure Sciences (PS)</option>
+                            <option value="Agriculture and Animal Husbandry (AAH)">Agriculture and Animal Husbandry (AAH)</option>
+                            <option value="Engineering and Technology (ET)" selected>Engineering and Technology (ET)</option>
+                            <option value="Medicine and Pharmacy (MP)">Medicine and Pharmacy (MP)</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-slate-700 mb-1">Role *</label>
+                        <select id="role" required class="w-full border border-slate-300 rounded-lg px-3 py-2 text-sm bg-white focus:outline-none focus:ring-2 focus:ring-teal-500">
+                            <option value="">Select</option>
+                            <option value="Participant" selected>Participant</option>
+                            <option value="Project Presenter">Project Presenter</option>
+                            <option value="Visitor">Visitor</option>
+                            <option value="Volunteer">Volunteer</option>
+                            <option value="Organizer">Organizer</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="border-t border-slate-200 pt-4">
+                    <p class="text-sm font-semibold text-slate-700 mb-3">Rate the following (1–5 stars):</p>
+                    <div class="space-y-2">
+                        <div class="flex items-center justify-between rating-group">
+                            <span class="text-xs text-slate-600">Overall experience</span>
+                            <div class="flex items-center gap-2">
+                                <input type="hidden" id="overallExperience" value="5">
+                                <div class="flex text-amber-400 star-picker">
+                                    <i class="fa-solid fa-star" data-value="1"></i>
+                                    <i class="fa-solid fa-star" data-value="2"></i>
+                                    <i class="fa-solid fa-star" data-value="3"></i>
+                                    <i class="fa-solid fa-star" data-value="4"></i>
+                                    <i class="fa-solid fa-star" data-value="5"></i>
+                                </div>
+                                <span class="text-xs text-slate-500 w-8 rating-text">5/5</span>
+                            </div>
+                        </div>
+                        <div class="flex items-center justify-between rating-group">
+                            <span class="text-xs text-slate-600">Organization</span>
+                            <div class="flex items-center gap-2">
+                                <input type="hidden" id="organization" value="5">
+                                <div class="flex text-amber-400 star-picker">
+                                    <i class="fa-solid fa-star" data-value="1"></i>
+                                    <i class="fa-solid fa-star" data-value="2"></i>
+                                    <i class="fa-solid fa-star" data-value="3"></i>
+                                    <i class="fa-solid fa-star" data-value="4"></i>
+                                    <i class="fa-solid fa-star" data-value="5"></i>
+                                </div>
+                                <span class="text-xs text-slate-500 w-8 rating-text">5/5</span>
+                            </div>
+                        </div>
+                        <div class="flex items-center justify-between rating-group">
+                            <span class="text-xs text-slate-600">Project quality</span>
+                            <div class="flex items-center gap-2">
+                                <input type="hidden" id="projectQuality" value="5">
+                                <div class="flex text-amber-400 star-picker">
+                                    <i class="fa-solid fa-star" data-value="1"></i>
+                                    <i class="fa-solid fa-star" data-value="2"></i>
+                                    <i class="fa-solid fa-star" data-value="3"></i>
+                                    <i class="fa-solid fa-star" data-value="4"></i>
+                                    <i class="fa-solid fa-star" data-value="5"></i>
+                                </div>
+                                <span class="text-xs text-slate-500 w-8 rating-text">5/5</span>
+                            </div>
+                        </div>
+                        <div class="flex items-center justify-between rating-group">
+                            <span class="text-xs text-slate-600">Venue & facilities</span>
+                            <div class="flex items-center gap-2">
+                                <input type="hidden" id="venue" value="5">
+                                <div class="flex text-amber-400 star-picker">
+                                    <i class="fa-solid fa-star" data-value="1"></i>
+                                    <i class="fa-solid fa-star" data-value="2"></i>
+                                    <i class="fa-solid fa-star" data-value="3"></i>
+                                    <i class="fa-solid fa-star" data-value="4"></i>
+                                    <i class="fa-solid fa-star" data-value="5"></i>
+                                </div>
+                                <span class="text-xs text-slate-500 w-8 rating-text">5/5</span>
+                            </div>
+                        </div>
+                        <div class="flex items-center justify-between rating-group">
+                            <span class="text-xs text-slate-600">Coordinator support</span>
+                            <div class="flex items-center gap-2">
+                                <input type="hidden" id="coordinatorSupport" value="5">
+                                <div class="flex text-amber-400 star-picker">
+                                    <i class="fa-solid fa-star" data-value="1"></i>
+                                    <i class="fa-solid fa-star" data-value="2"></i>
+                                    <i class="fa-solid fa-star" data-value="3"></i>
+                                    <i class="fa-solid fa-star" data-value="4"></i>
+                                    <i class="fa-solid fa-star" data-value="5"></i>
+                                </div>
+                                <span class="text-xs text-slate-500 w-8 rating-text">5/5</span>
+                            </div>
+                        </div>
+                        <div class="flex items-center justify-between rating-group">
+                            <span class="text-xs text-slate-600">Learning opportunities</span>
+                            <div class="flex items-center gap-2">
+                                <input type="hidden" id="learningOpportunities" value="5">
+                                <div class="flex text-amber-400 star-picker">
+                                    <i class="fa-solid fa-star" data-value="1"></i>
+                                    <i class="fa-solid fa-star" data-value="2"></i>
+                                    <i class="fa-solid fa-star" data-value="3"></i>
+                                    <i class="fa-solid fa-star" data-value="4"></i>
+                                    <i class="fa-solid fa-star" data-value="5"></i>
+                                </div>
+                                <span class="text-xs text-slate-500 w-8 rating-text">5/5</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="border-t border-slate-200 pt-4">
+                    <label class="block text-sm font-medium text-slate-700 mb-1">What did you like most? *</label>
+                    <textarea id="whatLiked" required rows="2" class="w-full border border-slate-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-teal-500" placeholder="Share your experience..."></textarea>
+                </div>
+
+                <div>
+                    <label class="block text-sm font-medium text-slate-700 mb-1">Would you recommend Aavishkar?</label>
+                    <select id="recommendation" class="w-full border border-slate-300 rounded-lg px-3 py-2 text-sm bg-white focus:outline-none focus:ring-2 focus:ring-teal-500">
+                        <option value="Yes">Yes</option>
+                        <option value="No">No</option>
+                        <option value="Maybe">Maybe</option>
+                    </select>
+                </div>
+
+                <div class="flex items-start gap-2">
+                    <input type="checkbox" id="consent" required class="mt-0.5 h-4 w-4 text-teal-600 rounded border-slate-300">
+                    <span class="text-xs text-slate-500">I confirm the information is accurate and agree to use my details for feedback and certificate generation.</span>
+                </div>
+
+                <div id="form-error" class="hidden bg-red-50 border border-red-200 text-red-600 text-sm rounded-lg px-3 py-2"></div>
+
+                <button type="submit" id="submitBtn" class="w-full bg-teal-700 hover:bg-teal-800 text-white font-semibold py-3 rounded-lg transition flex items-center justify-center gap-2">
+                    <span id="btnText">Submit & Generate Certificate</span>
+                    <i id="btnSpinner" class="fa-solid fa-spinner fa-spin hidden"></i>
+                </button>
+            </form>
+        </div>
+
+        <!-- Success & Certificate (Hidden by default) -->
+        <div id="success-container" class="hidden mt-6 space-y-5">
+            <div class="bg-green-50 border border-green-200 rounded-xl p-4 text-center">
+                <i class="fa-solid fa-circle-check text-green-500 text-2xl mb-1"></i>
+                <h3 class="font-bold text-green-800">Feedback Submitted Successfully!</h3>
+                <p class="text-xs text-green-600 mt-1">Your data has been saved and your certificate is ready.</p>
+                <div class="text-xs text-green-700 mt-2">
+                    <span>Submission ID: <strong id="displaySubId">-</strong></span>
+                </div>
+            </div>
+
+            <!-- Certificate -->
+            <div class="bg-white rounded-xl shadow-md p-4 overflow-x-auto">
+                <div id="certificateElement" class="w-[850px] min-h-[600px] mx-auto border-[8px] border-teal-800 relative flex flex-col bg-white">
+                    <!-- Inner decorative border -->
+                    <div class="absolute inset-3 border border-cyan-300 pointer-events-none"></div>
+                    
+                    <!-- Watermark -->
+                    <div class="absolute inset-0 flex items-center justify-center opacity-[0.03] pointer-events-none">
+                        <i class="fa-solid fa-graduation-cap text-[320px] text-teal-800"></i>
+                    </div>
+
+                    <!-- Header with Logos -->
+                    <div class="relative z-10 flex items-center justify-between px-10 pt-8 pb-3">
+                        <div class="w-24 h-24 flex items-center justify-center">
+                            <img src="logo1.png" alt="Logo 1" class="max-h-full max-w-full object-contain" onerror="this.onerror=null; this.src='https://placehold.co/96x96?text=SGBAU';">
+                        </div>
+                        <div class="text-center flex-1 px-4">
+                            <p class="text-[11px] uppercase tracking-[0.25em] text-slate-500 font-semibold mb-1">Vasundhara Bahuddeshiya Samajik Sanstha's</p>
+                            <h1 class="text-2xl font-black text-teal-900 tracking-wide leading-tight" style="font-family: 'Playfair Display', serif;">SIDDHIVINAYAK TECHNICAL CAMPUS</h1>
+                            <p class="text-sm font-semibold text-teal-700 tracking-widest mt-0.5">SHEGAON</p>
+                            <div class="w-40 h-0.5 bg-cyan-500 mx-auto mt-2"></div>
+                        </div>
+                        <div class="w-24 h-24 flex items-center justify-center">
+                            <img src="logo2.png" alt="Logo 2" class="max-h-full max-w-full object-contain" onerror="this.onerror=null; this.src='https://placehold.co/96x96?text=STC';">
+                        </div>
+                    </div>
+
+                    <!-- Certificate Title -->
+                    <div class="relative z-10 text-center mt-3 mb-5">
+                        <h2 class="text-3xl font-black text-teal-900 tracking-[0.2em] uppercase" style="font-family: 'Playfair Display', serif;">Certificate of Participation</h2>
+                        <div class="flex items-center justify-center gap-4 mt-2">
+                            <span class="w-16 h-px bg-cyan-400"></span>
+                            <i class="fa-solid fa-award text-cyan-500 text-base"></i>
+                            <span class="w-16 h-px bg-cyan-400"></span>
+                        </div>
+                    </div>
+
+                    <!-- Body -->
+                    <div class="relative z-10 text-center px-16 space-y-4 flex-1 flex flex-col justify-center">
+                        <p class="text-sm text-slate-500 italic">This certificate is proudly presented to</p>
+                        
+                        <h1 id="certName" class="text-4xl font-extrabold text-teal-900 tracking-wide border-b-2 border-cyan-400 inline-block mx-auto pb-2 px-10" style="font-family: 'Playfair Display', serif;"></h1>
+                        
+                        <p class="text-sm text-slate-600 max-w-2xl mx-auto leading-relaxed pt-2">
+                            in recognition of their active participation in <strong class="text-teal-800">Aavishkar 2026–27 – Internal Research Convention</strong>, organized at Vasundhara Bahuddeshiya Samajik Sanstha's Siddhivinayak Technical Campus, Shegaon, on <strong>17 October 2026</strong>.
+                        </p>
+                        
+                        <p class="text-xs text-slate-500 max-w-2xl mx-auto leading-relaxed">
+                            The event provided a platform to showcase research ideas, innovation, creativity, and scientific thinking as part of the preparation for the <strong class="text-teal-800">Maharashtra State Inter-University Research Convention (Aavishkar 2026–27)</strong>.
+                        </p>
+                        
+                        <p class="text-xs text-slate-500 max-w-2xl mx-auto leading-relaxed">
+                            We appreciate their enthusiasm, dedication, and valuable participation and wish them success in their future research endeavors.
+                        </p>
+                    </div>
+
+                    <!-- Footer -->
+                    <div class="relative z-10 flex justify-between items-end px-12 pb-8 pt-4 border-t border-slate-200 mt-5">
+                        <div class="text-left text-[11px] text-slate-600 space-y-1">
+                            <p><span class="font-semibold text-slate-700">Date:</span> 17 October 2026</p>
+                            <p><span class="font-semibold text-slate-700">Venue:</span> Siddhivinayak Technical Campus, Shegaon</p>
+                        </div>
+                        <div class="text-center">
+                            <div class="h-12 border-b-2 border-slate-400 mb-2 w-40 mx-auto"></div>
+                            <p class="font-bold text-teal-900 text-xs" style="font-family: 'Playfair Display', serif;">Convention Coordinator</p>
+                            <p class="text-[9px] text-slate-500">Siddhivinayak Technical Campus</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Buttons -->
+            <div class="flex flex-wrap gap-3 justify-center">
+                <button id="downloadBtn" class="bg-cyan-500 hover:bg-cyan-600 text-white font-semibold px-5 py-2.5 rounded-lg text-sm flex items-center gap-2 shadow">
+                    <i class="fa-solid fa-download"></i> Download PDF
+                </button>
+                <button id="printBtn" class="bg-slate-700 hover:bg-slate-800 text-white font-semibold px-5 py-2.5 rounded-lg text-sm flex items-center gap-2 shadow">
+                    <i class="fa-solid fa-print"></i> Print
+                </button>
+                <button id="resetBtn" class="bg-white border border-slate-300 hover:bg-slate-50 text-slate-700 font-semibold px-5 py-2.5 rounded-lg text-sm flex items-center gap-2 shadow">
+                    <i class="fa-solid fa-rotate-left"></i> New Response
+                </button>
+            </div>
+        </div>
+
+    </main>
+
+    <footer class="bg-teal-800 text-teal-200 text-center text-xs py-4 mt-8">
+        <p>SIDDHIVINAYAK TECHNICAL CAMPUS, SHEGAON</p>
+        <p class="text-teal-300/70">Aavishkar 2026–27</p>
+    </footer>
+
+    <script src="script.js"></script>
+</body>
+</html> 

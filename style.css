@@ -1,0 +1,36 @@
+/* Smooth scrolling */
+html {
+    scroll-behavior: smooth;
+}
+
+body {
+    font-family: 'Inter', sans-serif;
+}
+
+/* Certificate responsiveness */
+#certificateElement {
+    transform-origin: top center;
+}
+
+/* Star picker cursor */
+.star-picker i {
+    cursor: pointer;
+    transition: color 0.15s;
+}
+
+@media print {
+    body * {
+        visibility: hidden;
+    }
+    #certificateElement, #certificateElement * {
+        visibility: visible;
+    }
+    #certificateElement {
+        position: absolute;
+        left: 0;
+        top: 0;
+        width: 100%;
+        border: none !important;
+        box-shadow: none !important;
+    }
+}
