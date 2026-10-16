@@ -9,8 +9,65 @@
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Playfair+Display:wght@700;800;900&display=swap" rel="stylesheet">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
-    <link rel="stylesheet" href="style.css">
+    <style>
+        /* Print only the certificate */
+        @media print {
+            @page {
+                size: A4 landscape;
+                margin: 8mm;
+            }
+
+            /* Hide everything by default */
+            body * {
+                visibility: hidden !important;
+            }
+
+            /* Show only the certificate */
+            #certificateElement,
+            #certificateElement * {
+                visibility: visible !important;
+            }
+
+            /* Position certificate at top-left of the page */
+            #certificateElement {
+                position: absolute !important;
+                left: 0 !important;
+                top: 0 !important;
+                width: 850px !important;
+                max-width: 850px !important;
+                min-height: 600px !important;
+                margin: 0 !important;
+                transform: scale(0.92) !important;
+                transform-origin: top left !important;
+                box-shadow: none !important;
+                border: 6px solid #115e59 !important;
+                background: #ffffff !important;
+            }
+
+            /* Force colors to render */
+            #certificateElement,
+            #certificateElement * {
+                -webkit-print-color-adjust: exact !important;
+                print-color-adjust: exact !important;
+            }
+
+            /* Hide everything else */
+            header,
+            footer,
+            #form-container,
+            #success-container > div:first-child,
+            #success-container > div:last-child,
+            .no-print,
+            button {
+                display: none !important;
+            }
+        }
+
+        /* Base styles that were in style.css (minimal) */
+        body {
+            font-family: 'Inter', sans-serif;
+        }
+    </style>
 </head>
 <body class="bg-slate-100 min-h-screen flex flex-col">
 
@@ -208,7 +265,7 @@
             <!-- Certificate -->
             <div class="bg-white rounded-xl shadow-md p-4 overflow-x-auto">
                 <p class="text-xs text-slate-400 text-center mb-2 md:hidden no-print">
-                    Preview scaled to fit — tap <strong>Download PDF</strong> for full-size
+                    Preview scaled to fit — tap <strong>Download PDF</strong> or <strong>Download PNG</strong> for full-size
                 </p>
                 <div id="certificateElement" class="w-[850px] min-h-[600px] mx-auto border-[8px] border-teal-800 relative flex flex-col bg-white">
                     <!-- Inner decorative border -->
@@ -279,6 +336,9 @@
                 <button id="downloadBtn" class="bg-cyan-500 hover:bg-cyan-600 text-white font-semibold px-5 py-2.5 rounded-lg text-sm flex items-center gap-2 shadow">
                     <i class="fa-solid fa-download"></i> Download PDF
                 </button>
+                <button id="downloadPngBtn" class="bg-emerald-600 hover:bg-emerald-700 text-white font-semibold px-5 py-2.5 rounded-lg text-sm flex items-center gap-2 shadow">
+                    <i class="fa-solid fa-image"></i> Download PNG
+                </button>
                 <button id="printBtn" class="bg-slate-700 hover:bg-slate-800 text-white font-semibold px-5 py-2.5 rounded-lg text-sm flex items-center gap-2 shadow">
                     <i class="fa-solid fa-print"></i> Print
                 </button>
@@ -295,6 +355,376 @@
         <p class="text-teal-300/70">Aavishkar 2026–27</p>
     </footer>
 
-    <script src="script.js"></script>
+    <script>
+        // ============================================================
+        // Google Apps Script Web App URL
+        // ============================================================
+        const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbyW_KF54inHoVjoJ0npSPMTny9PJWLkbjbBEddrSLS9YVQjjSYinzlvLLUp2V9L3ToZ/exec";
+
+        // ============================================================
+        // Star Rating Interactivity
+        // ============================================================
+        document.querySelectorAll('.rating-group').forEach(group => {
+            const input = group.querySelector('input');
+            const stars = group.querySelectorAll('.star-picker i');
+            const ratingText = group.querySelector('.rating-text');
+
+            stars.forEach(star => {
+                star.addEventListener('click', () => {
+                    const val = star.getAttribute('data-value');
+                    input.value = val;
+                    ratingText.textContent = `${val}/5`;
+
+                    stars.forEach(s => {
+                        const sVal = s.getAttribute('data-value');
+                        if (sVal <= val) {
+                            s.classList.remove('fa-regular');
+                            s.classList.add('fa-solid');
+                        } else {
+                            s.classList.remove('fa-solid');
+                            s.classList.add('fa-regular');
+                        }
+                    });
+                });
+            });
+        });
+
+        // ============================================================
+        // Element References
+        // ============================================================
+        const form = document.getElementById('feedbackForm');
+        const submitBtn = document.getElementById('submitBtn');
+        const btnText = document.getElementById('btnText');
+        const btnSpinner = document.getElementById('btnSpinner');
+        const formError = document.getElementById('form-error');
+
+        let generatedData = null;
+
+        // ============================================================
+        // Form Submission Handler
+        // ============================================================
+        form.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            formError.classList.add('hidden');
+
+            const payload = {
+                fullName: document.getElementById('fullName').value.trim(),
+                email: document.getElementById('email').value.trim(),
+                department: document.getElementById('department').value.trim(),
+                academicLevel: document.getElementById('academicLevel').value,
+                participationCategory: document.getElementById('participationCategory').value,
+                role: document.getElementById('role').value,
+                overallExperience: document.getElementById('overallExperience').value,
+                organization: document.getElementById('organization').value,
+                projectQuality: document.getElementById('projectQuality').value,
+                venue: document.getElementById('venue').value,
+                coordinatorSupport: document.getElementById('coordinatorSupport').value,
+                learningOpportunities: document.getElementById('learningOpportunities').value,
+                whatLiked: document.getElementById('whatLiked').value.trim(),
+                recommendation: document.getElementById('recommendation').value,
+                consent: document.getElementById('consent').checked
+            };
+
+            if (!payload.consent) {
+                showError("Please agree to the consent checkbox before submitting.");
+                return;
+            }
+
+            submitBtn.disabled = true;
+            btnText.textContent = "Submitting...";
+            btnSpinner.classList.remove('hidden');
+
+            try {
+                const response = await fetch(SCRIPT_URL, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+                    body: JSON.stringify(payload),
+                    redirect: 'follow'
+                });
+
+                const text = await response.text();
+                console.log("Raw response from Apps Script:", text);
+
+                let result;
+                try {
+                    result = JSON.parse(text);
+                } catch (parseErr) {
+                    throw new Error("Server returned an invalid response. Please try again.");
+                }
+
+                if (result.status === "success") {
+                    generatedData = result;
+                    showSuccessScreen(payload, result);
+                } else {
+                    throw new Error(result.message || "Data was not saved. Please try again.");
+                }
+            } catch (err) {
+                console.error("Submission error:", err);
+                showError("Submission failed: " + err.message + " — Please try again.");
+            } finally {
+                submitBtn.disabled = false;
+                btnText.textContent = "Submit & Generate Certificate";
+                btnSpinner.classList.add('hidden');
+            }
+        });
+
+        // ============================================================
+        // Helpers
+        // ============================================================
+        function showError(msg) {
+            formError.textContent = msg;
+            formError.classList.remove('hidden');
+            formError.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        }
+
+        function showSuccessScreen(payload, res) {
+            document.getElementById('form-container').classList.add('hidden');
+            document.getElementById('success-container').classList.remove('hidden');
+            document.getElementById('displaySubId').textContent = res.submissionId || "SUB-XXXX";
+            document.getElementById('certName').textContent = payload.fullName;
+            autoFitCertificatePreview();
+            window.scrollTo({ top: 200, behavior: 'smooth' });
+        }
+
+        // ============================================================
+        // Auto-fit certificate preview on small screens
+        // ============================================================
+        function autoFitCertificatePreview() {
+            const wrapper = document.getElementById('certificateElement').parentElement;
+            const cert = document.getElementById('certificateElement');
+
+            const applyScale = () => {
+                const availableWidth = wrapper.clientWidth - 16;
+                const certWidth = 850;
+
+                if (availableWidth < certWidth) {
+                    const scale = availableWidth / certWidth;
+                    cert.style.transform = `scale(${scale})`;
+                    cert.style.transformOrigin = 'top left';
+                    wrapper.style.height = (cert.offsetHeight * scale) + 'px';
+                    wrapper.style.overflow = 'hidden';
+                } else {
+                    cert.style.transform = 'none';
+                    wrapper.style.height = '';
+                    wrapper.style.overflow = 'auto';
+                }
+            };
+
+            applyScale();
+            window.addEventListener('resize', applyScale);
+        }
+
+        // ============================================================
+        // Helper: create off-screen clone with native width, wait for images
+        // ============================================================
+        async function createCertificateClone() {
+            const original = document.getElementById('certificateElement');
+            const clone = original.cloneNode(true);
+            clone.id = 'certificateClone';
+            clone.style.position = 'fixed';
+            clone.style.top = '0';
+            clone.style.left = '0';
+            clone.style.width = '850px';
+            clone.style.maxWidth = '850px';
+            clone.style.minHeight = '600px';
+            clone.style.transform = 'none';
+            clone.style.transformOrigin = 'top left';
+            clone.style.zIndex = '2147483647';
+            clone.style.background = '#ffffff';
+            clone.style.pointerEvents = 'none';
+            clone.style.overflow = 'visible';
+
+            // Shield to hide from view
+            const shield = document.createElement('div');
+            shield.id = 'captureShield';
+            shield.style.position = 'fixed';
+            shield.style.inset = '0';
+            shield.style.background = '#ffffff';
+            shield.style.zIndex = '2147483646';
+            shield.style.pointerEvents = 'none';
+
+            document.body.appendChild(shield);
+            document.body.appendChild(clone);
+
+            // Wait for images to load
+            await new Promise(resolve => {
+                const imgs = clone.querySelectorAll('img');
+                let pending = imgs.length;
+                if (pending === 0) return resolve();
+                const done = () => { if (--pending <= 0) resolve(); };
+                imgs.forEach(img => {
+                    if (img.complete) done();
+                    else { img.onload = done; img.onerror = done; }
+                });
+                setTimeout(resolve, 2000);
+            });
+            await new Promise(r => setTimeout(r, 150));
+
+            return { clone, shield };
+        }
+
+        // ============================================================
+        // Download PDF — Direct html2canvas + jsPDF (mobile-safe)
+        // ============================================================
+        document.getElementById('downloadBtn').addEventListener('click', async () => {
+            const btn = document.getElementById('downloadBtn');
+            const originalHTML = btn.innerHTML;
+            btn.disabled = true;
+            btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Generating...';
+
+            let clone, shield;
+            try {
+                const result = await createCertificateClone();
+                clone = result.clone;
+                shield = result.shield;
+
+                const canvas = await html2canvas(clone, {
+                    scale: 2,
+                    useCORS: true,
+                    allowTaint: false,
+                    backgroundColor: '#ffffff',
+                    width: 850,
+                    height: clone.offsetHeight,
+                    windowWidth: 850,
+                    windowHeight: clone.offsetHeight,
+                    scrollX: 0,
+                    scrollY: 0,
+                    logging: false
+                });
+
+                const imgData = canvas.toDataURL('image/jpeg', 0.98);
+
+                const { jsPDF } = window.jspdf;
+                const pdfW = 11.69;   // A4 landscape width  (inches)
+                const pdfH = 8.27;    // A4 landscape height (inches)
+                const pdf = new jsPDF({ orientation: 'landscape', unit: 'in', format: 'a4' });
+
+                const imgAspect = canvas.width / canvas.height;
+                const pdfAspect = pdfW / pdfH;
+                let renderW, renderH, offsetX, offsetY;
+                if (imgAspect > pdfAspect) {
+                    renderW = pdfW;
+                    renderH = pdfW / imgAspect;
+                    offsetX = 0;
+                    offsetY = (pdfH - renderH) / 2;
+                } else {
+                    renderH = pdfH;
+                    renderW = pdfH * imgAspect;
+                    offsetX = (pdfW - renderW) / 2;
+                    offsetY = 0;
+                }
+
+                pdf.addImage(imgData, 'JPEG', offsetX, offsetY, renderW, renderH, undefined, 'FAST');
+                const name = (document.getElementById('certName').textContent || 'Participant')
+                    .trim().replace(/\s+/g, '_');
+                pdf.save(`Aavishkar_2026_Certificate_${name}.pdf`);
+            } catch (err) {
+                console.error('PDF generation failed:', err);
+                alert('Could not generate PDF automatically.\nPlease use the Print button and choose "Save as PDF".');
+            } finally {
+                if (clone) clone.remove();
+                if (shield) shield.remove();
+                btn.disabled = false;
+                btn.innerHTML = originalHTML;
+            }
+        });
+
+        // ============================================================
+        // Download PNG — full-size native resolution
+        // ============================================================
+        document.getElementById('downloadPngBtn').addEventListener('click', async () => {
+            const btn = document.getElementById('downloadPngBtn');
+            const originalHTML = btn.innerHTML;
+            btn.disabled = true;
+            btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Generating...';
+
+            let clone, shield;
+            try {
+                const result = await createCertificateClone();
+                clone = result.clone;
+                shield = result.shield;
+
+                const canvas = await html2canvas(clone, {
+                    scale: 2,
+                    useCORS: true,
+                    allowTaint: false,
+                    backgroundColor: '#ffffff',
+                    width: 850,
+                    height: clone.offsetHeight,
+                    windowWidth: 850,
+                    windowHeight: clone.offsetHeight,
+                    scrollX: 0,
+                    scrollY: 0,
+                    logging: false
+                });
+
+                const link = document.createElement('a');
+                const name = (document.getElementById('certName').textContent || 'Participant')
+                    .trim().replace(/\s+/g, '_');
+                link.download = `Aavishkar_2026_Certificate_${name}.png`;
+                link.href = canvas.toDataURL('image/png');
+                link.click();
+            } catch (err) {
+                console.error('PNG generation failed:', err);
+                alert('Could not generate PNG automatically.\nPlease try again or use the Print button.');
+            } finally {
+                if (clone) clone.remove();
+                if (shield) shield.remove();
+                btn.disabled = false;
+                btn.innerHTML = originalHTML;
+            }
+        });
+
+        // ============================================================
+        // Print Certificate
+        // ============================================================
+        document.getElementById('printBtn').addEventListener('click', () => {
+            const cert = document.getElementById('certificateElement');
+            const wrapper = cert.parentElement;
+
+            const prevTransform = cert.style.transform;
+            const prevTransformOrigin = cert.style.transformOrigin;
+            const prevWrapperHeight = wrapper.style.height;
+            const prevWrapperOverflow = wrapper.style.overflow;
+
+            cert.style.transform = 'none';
+            cert.style.transformOrigin = 'top left';
+            wrapper.style.height = 'auto';
+            wrapper.style.overflow = 'visible';
+
+            setTimeout(() => {
+                window.print();
+                setTimeout(() => {
+                    cert.style.transform = prevTransform;
+                    cert.style.transformOrigin = prevTransformOrigin;
+                    wrapper.style.height = prevWrapperHeight;
+                    wrapper.style.overflow = prevWrapperOverflow;
+                    autoFitCertificatePreview();
+                }, 300);
+            }, 100);
+        });
+
+        // ============================================================
+        // Reset Form
+        // ============================================================
+        document.getElementById('resetBtn').addEventListener('click', () => {
+            form.reset();
+
+            document.querySelectorAll('.rating-group').forEach(group => {
+                const input = group.querySelector('input');
+                input.value = 5;
+                group.querySelector('.rating-text').textContent = '5/5';
+                group.querySelectorAll('.star-picker i').forEach(s => {
+                    s.classList.remove('fa-regular');
+                    s.classList.add('fa-solid');
+                });
+            });
+
+            document.getElementById('success-container').classList.add('hidden');
+            document.getElementById('form-container').classList.remove('hidden');
+            document.getElementById('form-error').classList.add('hidden');
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        });
+    </script>
 </body>
 </html>
