@@ -1,6 +1,11 @@
+// ============================================================
 // Google Apps Script Web App URL
+// ============================================================
 const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbyW_KF54inHoVjoJ0npSPMTny9PJWLkbjbBEddrSLS9YVQjjSYinzlvLLUp2V9L3ToZ/exec";
+
+// ============================================================
 // Star Rating Interactivity
+// ============================================================
 document.querySelectorAll('.rating-group').forEach(group => {
     const input = group.querySelector('input');
     const stars = group.querySelectorAll('.star-picker i');
@@ -26,7 +31,9 @@ document.querySelectorAll('.rating-group').forEach(group => {
     });
 });
 
-// Form Submission Handler
+// ============================================================
+// Element References
+// ============================================================
 const form = document.getElementById('feedbackForm');
 const submitBtn = document.getElementById('submitBtn');
 const btnText = document.getElementById('btnText');
@@ -35,6 +42,9 @@ const formError = document.getElementById('form-error');
 
 let generatedData = null;
 
+// ============================================================
+// Form Submission Handler
+// ============================================================
 form.addEventListener('submit', async (e) => {
     e.preventDefault();
     formError.classList.add('hidden');
@@ -69,9 +79,7 @@ form.addEventListener('submit', async (e) => {
     try {
         const response = await fetch(SCRIPT_URL, {
             method: 'POST',
-            headers: {
-                'Content-Type': 'text/plain;charset=utf-8'
-            },
+            headers: { 'Content-Type': 'text/plain;charset=utf-8' },
             body: JSON.stringify(payload),
             redirect: 'follow'
         });
@@ -79,20 +87,22 @@ form.addEventListener('submit', async (e) => {
         const text = await response.text();
         console.log("Raw response from Apps Script:", text);
 
-        const result = JSON.parse(text);
+        let result;
+        try {
+            result = JSON.parse(text);
+        } catch (parseErr) {
+            throw new Error("Server returned an invalid response. Please try again.");
+        }
 
         if (result.status === "success") {
             generatedData = result;
-            // Only show certificate if data was actually saved
             showSuccessScreen(payload, result);
         } else {
-            // Data NOT saved — show error and keep the form visible
             throw new Error(result.message || "Data was not saved. Please try again.");
         }
     } catch (err) {
         console.error("Submission error:", err);
         showError("Submission failed: " + err.message + " — Please try again.");
-        // Form stays visible so user can retry
     } finally {
         submitBtn.disabled = false;
         btnText.textContent = "Submit & Generate Certificate";
@@ -100,6 +110,9 @@ form.addEventListener('submit', async (e) => {
     }
 });
 
+// ============================================================
+// Helpers
+// ============================================================
 function showError(msg) {
     formError.textContent = msg;
     formError.classList.remove('hidden');
@@ -107,37 +120,79 @@ function showError(msg) {
 }
 
 function showSuccessScreen(payload, res) {
-    // Hide form, show success + certificate
     document.getElementById('form-container').classList.add('hidden');
     document.getElementById('success-container').classList.remove('hidden');
-
     document.getElementById('displaySubId').textContent = res.submissionId || "SUB-XXXX";
-
-    // Populate Certificate
     document.getElementById('certName').textContent = payload.fullName;
-
+    autoFitCertificatePreview();
     window.scrollTo({ top: 200, behavior: 'smooth' });
 }
 
-// Download PDF Certificate
-document.getElementById('downloadBtn').addEventListener('click', () => {
-    const element = document.getElementById('certificateElement');
-    const opt = {
-        margin: 0.2,
-        filename: `Aavishkar_2026_Certificate_${document.getElementById('certName').textContent.replace(/\s+/g, '_')}.pdf`,
-        image: { type: 'jpeg', quality: 0.98 },
-        html2canvas: { scale: 2, useCORS: true },
-        jsPDF: { unit: 'in', format: 'a4', orientation: 'landscape' }
+// ============================================================
+// Auto-fit certificate preview on small screens
+// ============================================================
+function autoFitCertificatePreview() {
+    const wrapper = document.getElementById('certificateElement').parentElement;
+    const cert = document.getElementById('certificateElement');
+
+    const applyScale = () => {
+        const availableWidth = wrapper.clientWidth - 16;
+        const certWidth = 850;
+
+        if (availableWidth < certWidth) {
+            const scale = availableWidth / certWidth;
+            cert.style.transform = `scale(${scale})`;
+            cert.style.transformOrigin = 'top left';
+            wrapper.style.height = (cert.offsetHeight * scale) + 'px';
+            wrapper.style.overflow = 'hidden';
+        } else {
+            cert.style.transform = 'none';
+            wrapper.style.height = '';
+            wrapper.style.overflow = 'auto';
+        }
     };
-    html2pdf().from(element).set(opt).save();
-});
 
-// Print Certificate
+    applyScale();
+    window.addEventListener('resize', applyScale);
+}
+
+// ============================================================
+// Download PDF (via Print → Save as PDF)
+// ============================================================
 document.getElementById('printBtn').addEventListener('click', () => {
-    window.print();
+    const cert = document.getElementById('certificateElement');
+    const wrapper = cert.parentElement;
+
+    // Save current inline styles so we can restore
+    const prevTransform = cert.style.transform;
+    const prevTransformOrigin = cert.style.transformOrigin;
+    const prevWrapperHeight = wrapper.style.height;
+    const prevWrapperOverflow = wrapper.style.overflow;
+
+    // Reset scale so the full 850px certificate is printed
+    cert.style.transform = 'none';
+    cert.style.transformOrigin = 'top left';
+    wrapper.style.height = 'auto';
+    wrapper.style.overflow = 'visible';
+
+    // Give the browser a moment to reflow before opening print dialog
+    setTimeout(() => {
+        window.print();
+
+        // Restore after print dialog is dismissed
+        setTimeout(() => {
+            cert.style.transform = prevTransform;
+            cert.style.transformOrigin = prevTransformOrigin;
+            wrapper.style.height = prevWrapperHeight;
+            wrapper.style.overflow = prevWrapperOverflow;
+            autoFitCertificatePreview();
+        }, 300);
+    }, 100);
 });
 
+// ============================================================
 // Reset Form
+// ============================================================
 document.getElementById('resetBtn').addEventListener('click', () => {
     form.reset();
 
@@ -153,5 +208,6 @@ document.getElementById('resetBtn').addEventListener('click', () => {
 
     document.getElementById('success-container').classList.add('hidden');
     document.getElementById('form-container').classList.remove('hidden');
+    document.getElementById('form-error').classList.add('hidden');
     window.scrollTo({ top: 0, behavior: 'smooth' });
 });
