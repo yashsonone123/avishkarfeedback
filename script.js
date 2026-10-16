@@ -157,29 +157,130 @@ function autoFitCertificatePreview() {
 }
 
 // ============================================================
-// Download PDF (via Print → Save as PDF)
+// Download PDF — Direct html2canvas + jsPDF (mobile-safe)
+// ============================================================
+document.getElementById('downloadBtn').addEventListener('click', async () => {
+    const btn = document.getElementById('downloadBtn');
+    const originalHTML = btn.innerHTML;
+    btn.disabled = true;
+    btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Generating...';
+
+    const original = document.getElementById('certificateElement');
+    const name = (document.getElementById('certName').textContent || 'Participant')
+        .trim().replace(/\s+/g, '_');
+
+    // ---- 1. Create an off-screen clone at native 850px width ----
+    const clone = original.cloneNode(true);
+    clone.id = 'certificateClone';
+    clone.style.position = 'fixed';
+    clone.style.top = '0';
+    clone.style.left = '0';
+    clone.style.width = '850px';
+    clone.style.maxWidth = '850px';
+    clone.style.minHeight = '600px';
+    clone.style.transform = 'none';
+    clone.style.transformOrigin = 'top left';
+    clone.style.zIndex = '2147483647';
+    clone.style.background = '#ffffff';
+    clone.style.pointerEvents = 'none';
+
+    // Place clone visibly but BEHIND a full-screen white shield
+    const shield = document.createElement('div');
+    shield.id = 'captureShield';
+    shield.style.position = 'fixed';
+    shield.style.inset = '0';
+    shield.style.background = '#ffffff';
+    shield.style.zIndex = '2147483646';
+    shield.style.pointerEvents = 'none';
+
+    document.body.appendChild(shield);
+    document.body.appendChild(clone);
+
+    // Wait for images + fonts to be ready
+    await new Promise(resolve => {
+        const imgs = clone.querySelectorAll('img');
+        let pending = imgs.length;
+        if (pending === 0) return resolve();
+        const done = () => { if (--pending <= 0) resolve(); };
+        imgs.forEach(img => {
+            if (img.complete) done();
+            else { img.onload = done; img.onerror = done; }
+        });
+        setTimeout(resolve, 2000); // safety
+    });
+    await new Promise(r => setTimeout(r, 150));
+
+    try {
+        const canvas = await html2canvas(clone, {
+            scale: 2,
+            useCORS: true,
+            allowTaint: false,
+            backgroundColor: '#ffffff',
+            width: 850,
+            height: clone.offsetHeight,
+            windowWidth: 850,
+            windowHeight: clone.offsetHeight,
+            scrollX: 0,
+            scrollY: 0,
+            logging: false
+        });
+
+        const imgData = canvas.toDataURL('image/jpeg', 0.98);
+
+        // ---- 2. Build PDF sized exactly to the certificate aspect ----
+        const { jsPDF } = window.jspdf;
+        const pdfW = 11.69;   // A4 landscape width  (inches)
+        const pdfH = 8.27;    // A4 landscape height (inches)
+        const pdf = new jsPDF({ orientation: 'landscape', unit: 'in', format: 'a4' });
+
+        // Fit the image inside A4 while preserving aspect ratio
+        const imgAspect = canvas.width / canvas.height;
+        const pdfAspect = pdfW / pdfH;
+        let renderW, renderH, offsetX, offsetY;
+        if (imgAspect > pdfAspect) {
+            renderW = pdfW;
+            renderH = pdfW / imgAspect;
+            offsetX = 0;
+            offsetY = (pdfH - renderH) / 2;
+        } else {
+            renderH = pdfH;
+            renderW = pdfH * imgAspect;
+            offsetX = (pdfW - renderW) / 2;
+            offsetY = 0;
+        }
+
+        pdf.addImage(imgData, 'JPEG', offsetX, offsetY, renderW, renderH, undefined, 'FAST');
+        pdf.save(`Aavishkar_2026_Certificate_${name}.pdf`);
+    } catch (err) {
+        console.error('PDF generation failed:', err);
+        alert('Could not generate PDF automatically.\nPlease use the Print button and choose "Save as PDF".');
+    } finally {
+        clone.remove();
+        shield.remove();
+        btn.disabled = false;
+        btn.innerHTML = originalHTML;
+    }
+});
+
+// ============================================================
+// Print Certificate
 // ============================================================
 document.getElementById('printBtn').addEventListener('click', () => {
     const cert = document.getElementById('certificateElement');
     const wrapper = cert.parentElement;
 
-    // Save current inline styles so we can restore
     const prevTransform = cert.style.transform;
     const prevTransformOrigin = cert.style.transformOrigin;
     const prevWrapperHeight = wrapper.style.height;
     const prevWrapperOverflow = wrapper.style.overflow;
 
-    // Reset scale so the full 850px certificate is printed
     cert.style.transform = 'none';
     cert.style.transformOrigin = 'top left';
     wrapper.style.height = 'auto';
     wrapper.style.overflow = 'visible';
 
-    // Give the browser a moment to reflow before opening print dialog
     setTimeout(() => {
         window.print();
-
-        // Restore after print dialog is dismissed
         setTimeout(() => {
             cert.style.transform = prevTransform;
             cert.style.transformOrigin = prevTransformOrigin;
