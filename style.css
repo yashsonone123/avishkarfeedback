@@ -1,36 +1,52 @@
-/* Smooth scrolling */
-html {
-    scroll-behavior: smooth;
-}
-
-body {
-    font-family: 'Inter', sans-serif;
-}
-
-/* Certificate responsiveness */
-#certificateElement {
-    transform-origin: top center;
-}
-
-/* Star picker cursor */
-.star-picker i {
-    cursor: pointer;
-    transition: color 0.15s;
-}
-
+/* Print only the certificate */
 @media print {
+    @page {
+        size: A4 landscape;
+        margin: 8mm;
+    }
+
+    /* Hide everything by default */
     body * {
-        visibility: hidden;
+        visibility: hidden !important;
     }
-    #certificateElement, #certificateElement * {
-        visibility: visible;
+
+    /* Show only the certificate */
+    #certificateElement,
+    #certificateElement * {
+        visibility: visible !important;
     }
+
+    /* Position certificate at top-left of the page */
     #certificateElement {
-        position: absolute;
-        left: 0;
-        top: 0;
-        width: 100%;
-        border: none !important;
+        position: absolute !important;
+        left: 0 !important;
+        top: 0 !important;
+        width: 850px !important;
+        max-width: 850px !important;
+        min-height: 600px !important;
+        margin: 0 !important;
+        transform: scale(0.92) !important;
+        transform-origin: top left !important;
         box-shadow: none !important;
+        border: 6px solid #115e59 !important;
+        background: #ffffff !important;
+    }
+
+    /* Force colors to render */
+    #certificateElement,
+    #certificateElement * {
+        -webkit-print-color-adjust: exact !important;
+        print-color-adjust: exact !important;
+    }
+
+    /* Hide everything else */
+    header,
+    footer,
+    #form-container,
+    #success-container > div:first-child,
+    #success-container > div:last-child,
+    .no-print,
+    button {
+        display: none !important;
     }
 }
